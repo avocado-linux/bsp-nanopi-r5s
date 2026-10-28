@@ -1,0 +1,47 @@
+default_target: nanopi-r5s
+supported_targets:
+  - nanopi-r5s
+
+extensions:
+  avocado-bsp-nanopi-r5s:
+    version: 0.1.0
+    release: r0
+    summary: Board support for the FriendlyELEC NanoPi R5S (RK3568)
+    description: Board support for the FriendlyELEC NanoPi R5S (RK3568 router SBC, mainline kernel)
+    license: Apache-2.0
+    url: https://github.com/avocadolinux/avocado-os
+    vendor: Avocado Linux <info@avocadolinux.org>
+
+    types:
+      - sysext
+      - confext
+
+    on_merge:
+      - udevadm control --reload
+      - udevadm trigger --type=subsystems --action=add --settle
+      - udevadm trigger --type=devices --action=add --settle
+
+    # The board's drivers are modules in linux-yocto's arm64 defconfig; the
+    # base rootfs carries none of them.
+    packages:
+      # RTL8125B x2 (PCIe 2.5G): r8169 loads rtl_nic/rtl8125b-2.fw at probe.
+      linux-firmware-rtl-nic: '*'
+      kernel-module-r8169: '*'
+      kernel-module-phy-rockchip-naneng-combphy: '*'
+      # RK3568 GMAC (1G)
+      kernel-module-stmmac: '*'
+      kernel-module-stmmac-platform: '*'
+      kernel-module-dwmac-rk: '*'
+      # SoC and PMIC
+      kernel-module-rockchip-thermal: '*'
+      kernel-module-rtc-rk808: '*'
+      # M.2 NVMe
+      kernel-module-nvme: '*'
+      # GPU (Mali-G52), video decode and 2D blocks (no display output on the R5S)
+      kernel-module-rockchipdrm: '*'
+      kernel-module-panfrost: '*'
+      kernel-module-hantro-vpu: '*'
+      kernel-module-rockchip-rga: '*'
+
+sdk:
+  image: docker.io/avocadolinux/sdk:{{ env.AVOCADO_DISTRO_RELEASE }}
